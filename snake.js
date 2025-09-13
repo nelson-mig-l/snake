@@ -11,19 +11,23 @@ class Snake {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
-        this.snakeColor = '#0ff';
-        this.width = canvas.width / GRID_SIZE;
-        this.height = canvas.height / GRID_SIZE;
+        this.color = '#0ff';
+        this.columns = canvas.width / GRID_SIZE;
+        this.rows = canvas.height / GRID_SIZE;
         this.body = [
-            { x: this.width / 2, y: this.height / 2 },
-            { x: this.width / 2 - 1, y: this.height / 2 },
-            { x: this.width / 2 - 2, y: this.height / 2 }
+            { x: this.columns / 2, y: this.rows / 2 },
+            { x: this.columns / 2 - 1, y: this.rows / 2 },
+            { x: this.columns / 2 - 2, y: this.rows / 2 }
         ];
+    }
+
+    head() {
+        return { x: this.body[0].x, y: this.body[0].y };
     }
 
     draw() {
         this.body.forEach(segment => {
-            this.ctx.fillStyle = this.snakeColor;
+            this.ctx.fillStyle = this.color;
             this.ctx.fillRect(segment.x * GRID_SIZE, segment.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
         });
     }
@@ -34,11 +38,11 @@ class Ground {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
-        this.groundColor = '#444';
+        this.color = '#444';
     }
 
     draw() {
-        this.ctx.fillStyle = this.groundColor;
+        this.ctx.fillStyle = this.color;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
@@ -48,21 +52,21 @@ class Food {
     constructor(canvas) {
         this.position = { x: 0, y: 0 };
         this.ctx = canvas.getContext('2d');
-        this.width = canvas.width / GRID_SIZE;
-        this.height = canvas.height / GRID_SIZE;
-        this.foodColor = '#f00';
+        this.columns = canvas.width / GRID_SIZE;
+        this.rows = canvas.height / GRID_SIZE;
+        this.color = '#f00';
         this.create();
     }
 
     create() {
         this.position = {
-            x: Math.floor(Math.random() * this.width),
-            y: Math.floor(Math.random() * this.height)
+            x: Math.floor(Math.random() * this.columns),
+            y: Math.floor(Math.random() * this.rows)
         };
     }
 
     draw() {
-        this.ctx.fillStyle = this.foodColor;
+        this.ctx.fillStyle = this.color;
         this.ctx.fillRect(this.position.x * GRID_SIZE, this.position.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
     }
 
@@ -70,13 +74,15 @@ class Food {
 
 
 class Game {
-    constructor() {
-        this.canvas = document.getElementById('canvas');
+    constructor(canvas) {
+        this.canvas = canvas;
         this.snake = new Snake(this.canvas);
         this.ground = new Ground(this.canvas);
         this.food = new Food(this.canvas);
         this.direction = Direction.RIGHT;
         this.game = null;
+        this.columns = canvas.width / GRID_SIZE;
+        this.rows = canvas.height / GRID_SIZE;
         window.addEventListener('keydown', this.onKeyDown.bind(this));
     }
 
@@ -115,7 +121,7 @@ class Game {
     }
 
     updateSnake() {
-        const head = { x: this.snake.body[0].x, y: this.snake.body[0].y };
+        const head = this.snake.head();
         switch (this.direction) {
             case Direction.RIGHT:
                 head.x++;
@@ -130,7 +136,8 @@ class Game {
                 head.y--;
                 break;
         }
-        if (head.x < 0 || head.x >= this.width || head.y < 0 || head.y >= this.height ||
+        //if (head.x < 0 || head.x >= this.width || head.y < 0 || head.y >= this.height ||
+        if (head.x < 0 || head.x >= this.columns || head.y < 0 || head.y >= this.rows ||
             this.snake.body.some(segment => segment.x === head.x && segment.y === head.y)) {
             clearInterval(this.game);
         }
@@ -142,8 +149,8 @@ class Game {
         }
     }
 
-
 }
 
-const game = new Game();
+const canvas = document.getElementById('canvas');
+const game = new Game(canvas);
 game.start();
